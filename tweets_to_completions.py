@@ -6,6 +6,8 @@ CSV_FILEPATH = r"tweets/tweets.csv"
 
 
 def find_date_column(csvFilePath):
+    """Handles BOM"""
+
     with open(csvFilePath, encoding="utf-8-sig") as csvf:
         csvReader = csv.DictReader(csvf)
         if '\ufeff"Date"' in csvReader.fieldnames:
@@ -15,8 +17,9 @@ def find_date_column(csvFilePath):
         else:
             return None
 
+def tweet_make_json(csvFilePath, num_rows):
+    """Convert csv into json"""
 
-def make_json(csvFilePath, num_rows=50):
     data = {}
     date_column = find_date_column(csvFilePath)
 
@@ -40,5 +43,28 @@ def make_json(csvFilePath, num_rows=50):
     else:
         print("No 'Date' column found in the CSV file.")
 
+def get_keywords_from_tweet():
+    """Gets keywords from tweet to use in training data."""
 
-make_json(CSV_FILEPATH, num_rows=50)
+
+def create_dataset():
+    """Creates dataset in the format of openai chat completions api."""
+
+    """
+        "message": [
+            {"role": "system", "content": "You output tweets based on what the prompts are."},
+            {"role": "user", "content": "<prompts from the tweets>"},
+            {"role": "assistant", "content": "<the tweet>"}
+            ]
+    """
+    messages = []
+    data = {}
+    
+    # should output json file
+
+
+
+def check_dataset_format():
+    """Runs checks to ensure formatting for chat completions api is correct."""
+
+tweet_make_json(CSV_FILEPATH, 50)
