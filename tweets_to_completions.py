@@ -1,9 +1,11 @@
 import csv
 import json
 import os
+from openai import OpenAI
 
 CSV_FILEPATH = r"tweets/tweets.csv"
 
+client = OpenAI()
 
 def find_date_column(csvFilePath):
     """Handles BOM"""
@@ -17,35 +19,41 @@ def find_date_column(csvFilePath):
         else:
             return None
 
-def tweet_make_json(csvFilePath, num_rows):
-    """Convert csv into json"""
+def tweet_make_content_array(csvFilePath, num_rows):
+    """Extract 'Content' values from CSV and return as an array"""
 
-    data = {}
+    content_array = []
     date_column = find_date_column(csvFilePath)
 
     if date_column:
-        json_file_name = f"tweets_{num_rows}_rows.json"
-        jsonFilePath = os.path.join("tweets", json_file_name)
         with open(csvFilePath, encoding="utf-8-sig") as csvf:
             csvReader = csv.DictReader(csvf)
             row_count = 0
             for rows in csvReader:
-                key = rows[date_column]
-                data[key] = rows
+                content_array.append(rows["Content"])
                 row_count += 1
                 if row_count >= num_rows:
                     break
 
-        with open(jsonFilePath, "w", encoding="utf-8") as jsonf:
-            jsonf.write(json.dumps(data, indent=4))
-
-        print(f"JSON file '{json_file_name}' created successfully at '{jsonFilePath}'.")
+        return content_array
     else:
-        print("No 'Date' column found in the CSV file.")
+        return ["No 'Date' column found in the CSV file."]
 
 def get_keywords_from_tweet():
-    """Gets keywords from tweet to use in training data."""
+    """Gets up to 3 keywords from tweet to use in training data."""
 
+    content = "This is a tweet about cats."  # the tweet
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": "You will be provided with an array of strings, and your task is to extract up to 3 keywords from each element of the array.",
+            },
+            {"role": "user", "content": content},
+        ]
+    )
+    return response.choices[0].message.content  # cats, tweet
 
 def create_dataset():
     """Creates dataset in the format of openai chat completions api."""
@@ -53,18 +61,21 @@ def create_dataset():
     """
         "message": [
             {"role": "system", "content": "You output tweets based on what the prompts are."},
-            {"role": "user", "content": "<prompts from the tweets>"},
+            {"role": "user", "content": "<keywords from the tweets>"},
             {"role": "assistant", "content": "<the tweet>"}
             ]
     """
     messages = []
     data = {}
-    
-    # should output json file
 
+    # should output json file
 
 
 def check_dataset_format():
     """Runs checks to ensure formatting for chat completions api is correct."""
 
-tweet_make_json(CSV_FILEPATH, 50)
+
+# tweet_make_json(CSV_FILEPATH, 50)
+get_keywords_from_tweet()
+
+
