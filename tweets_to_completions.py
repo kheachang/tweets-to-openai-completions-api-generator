@@ -62,7 +62,7 @@ def tweet_make_content_array(csvFilePath, num_rows):
 
 def get_keywords_from_tweet(tweets):
     """Gets up to 3 keywords from tweet to use in training data."""
-
+    tweets_list_to_string = json.dumps(tweets)
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -70,10 +70,11 @@ def get_keywords_from_tweet(tweets):
                 "role": "system",
                 "content": "You will be provided with an array of strings, and your task is to extract up to 3 keywords from each element of the array. Return a new array with the keywords as strings separated by commas for each original string.",
             },
-            {"role": "user", "content": tweets},
+            {"role": "user", "content": tweets_list_to_string},
         ],
     )
-    return response  # cats, tweet
+    print(type(response.choices[0].message.content))
+    return response.choices[0].message.content  # '["keyword", "keyword2, keyword3"]'
 
 
 def create_dataset():
