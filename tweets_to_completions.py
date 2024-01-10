@@ -40,22 +40,32 @@ def remove_emojis(text):
 def tweet_make_content_array(csvFilePath, num_rows):
     """Extract 'Content' values from CSV and return as an array"""
 
-    content_array = []
+    message_list = []
     date_column = find_date_column(csvFilePath)
+    # sys_message = {"role": "system", "content": "You create tweets based on what the prompts are."}
 
     if date_column:
         with open(csvFilePath, encoding="utf-8-sig") as csvf:
             csvReader = csv.DictReader(csvf)
             row_count = 0
             for rows in csvReader:
+                sys_message = {"role": "system", "content": "You create tweets based on what the prompts are."}
+                assis_message = {"role": "assistant"}
                 content = rows["Content"]
                 content_without_emojis = remove_emojis(content)
-                content_array.append(content_without_emojis)
+                # content_array.append(content_without_emojis)
+                assis_message["content"] = content_without_emojis  # tweet
+                message_list.append({"messages": [sys_message, assis_message]})
                 row_count += 1
+                print(content_without_emojis)
                 if row_count >= num_rows:
                     break
 
-        return content_array  # 948 tokens
+        with open(f"tweets/tweets_{num_rows}_rows.jsonl.", 'w', encoding='utf-8') as jsonl_file:
+            for message in message_list:
+                jsonl_file.write(json.dumps(message) + '\n')
+
+        # return content_array  # 948 tokens
     else:
         return ["No 'Date' column found in the CSV file."]
 
@@ -97,5 +107,6 @@ def check_dataset_format():
     """Runs checks to ensure formatting for chat completions api is correct."""
 
 
-tweets = tweet_make_content_array(CSV_FILEPATH, 50)
-get_keywords_from_tweet(tweets)
+tweet_make_content_array(CSV_FILEPATH, 50)
+# tweets = tweet_make_content_array(CSV_FILEPATH, 50)
+# get_keywords_from_tweet(tweets)
