@@ -23,8 +23,8 @@ def find_date_column(csvFilePath):
             return None
 
 
-def remove_emojis(text):
-    """Remove emojis from text using regex"""
+def remove_emojis_special_char(text):
+    """Remove emojis and decode apostrophes from text using regex"""
     emoji_pattern = re.compile(
         "["
         "\U0001F600-\U0001F64F"  # emoticons
@@ -36,7 +36,16 @@ def remove_emojis(text):
         flags=re.UNICODE,
     )
 
-    return emoji_pattern.sub(r'', text)
+    # Replace encoded apostrophes with standard representation
+    text_with_standard_apostrophes = text.replace("’", "'")
+
+    text_with_replaced_ellipsis = text_with_standard_apostrophes.replace("…", "...")
+
+    # Remove emojis using regex
+    revised_text = emoji_pattern.sub(r'', text_with_replaced_ellipsis)
+
+    return revised_text
+
 
 def tweet_make_content_array(csvFilePath, num_rows):
     """Extract 'Content' values from CSV and return as an array"""
@@ -54,7 +63,7 @@ def tweet_make_content_array(csvFilePath, num_rows):
                 sys_message = {"role": "system", "content": "You create tweets based on what the prompts are."}
                 assis_message = {"role": "assistant"}
                 content = rows["Content"]
-                content_without_emojis = remove_emojis(content)
+                content_without_emojis = remove_emojis_special_char(content)
                 content_array.append(content_without_emojis)
                 assis_message["content"] = content_without_emojis  # tweet
                 message_list.append({"messages": [sys_message, assis_message]})
@@ -101,11 +110,10 @@ def get_keywords_from_tweet(tweets):
                     # Write the updated JSON data back to the file
                     with open(fine_tuning_jsonl_file, 'a', encoding='utf-8') as output_file:
                         output_file.write(json.dumps(json_data) + '\n')
+                return "Fine tuning file complete. Check inside the tweets directory."
             except json.JSONDecodeError as e:
                 print(f"Error decoding JSON at line {index + 1}: {e}")
     
-    return "Fine tuning file complete. Check inside the tweets directory."
-
 
 def create_dataset():   
     """Creates dataset in the format of openai chat completions api."""
@@ -127,6 +135,5 @@ def check_dataset_format():
     """Runs checks to ensure formatting for chat completions api is correct."""
 
 
-# tweet_make_content_array(CSV_FILEPATH, 50)
 tweets = tweet_make_content_array(CSV_FILEPATH, 50)
 get_keywords_from_tweet(tweets)
