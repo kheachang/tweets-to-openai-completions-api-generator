@@ -1,4 +1,4 @@
-.csv
-.json
+*.csv
+*.json
 .env
-.jsonl
+*.jsonl
