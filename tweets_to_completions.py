@@ -47,7 +47,7 @@ def remove_emojis_special_char(text):
     return revised_text
 
 
-def tweet_make_content_array(csvFilePath, num_rows):
+def tweet_make_content_array(csvFilePath, num_rows):  # TODO: alter to be more based on tone.
     """Extract 'Content' values from CSV and return as an array"""
 
     message_list = []
@@ -132,10 +132,19 @@ def create_fine_tuning_job(file_id):
         training_file=file_id,
         model="gpt-3.5-turbo"
     )
-    print(job)
     return job
+
+def generate_tweet():  # TODO: at least a certain number of char. 
+    prompt = input("Enter keywords separated by comma: ")
+    response = client.chat.completions.create(
+        model="ft:gpt-3.5-turbo-0613:personal::8hUtzBjE",
+        messages=[
+            {"role": "system", "content": "You are a tweet generator."},
+            {"role": "user", "content": prompt.replace(", ", ",")}  # prompt: "key1,key2"
+        ]
+    )
+    print(prompt + ": " + response.choices[0].message.content) 
 
 # tweets = tweet_make_content_array(CSV_FILEPATH, 50)
 # get_keywords_from_tweet(tweets)
-file_id = upload_training_file().id
-create_fine_tuning_job(file_id)
+generate_tweet()
