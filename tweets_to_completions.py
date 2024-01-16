@@ -115,25 +115,27 @@ def get_keywords_from_tweet(tweets):
                 print(f"Error decoding JSON at line {index + 1}: {e}")
     
 
-def create_dataset():   
-    """Creates dataset in the format of openai chat completions api."""
+def upload_training_file():   
+    """Uploads training file via Files API. Returns uploaded File Object."""
+    try:
+        f = client.files.create(
+            file=open("tweets/fine_tuning_file.jsonl", "rb"),  # TODO: make file names dynamic possibly
+            purpose="fine-tune"
+        )
+        return f
 
-    """
-        "message": [
-            {"role": "system", "content": "You output tweets based on what the prompts are."},
-            {"role": "user", "content": "<keywords from the tweets>"},
-            {"role": "assistant", "content": "<the tweet>"}
-            ]
-    """
-    messages = []
-    data = {}
+    except IOError as e:
+        return f"Error: {e}"
 
-    # should output json file
+def create_fine_tuning_job(file_id):
+    job = client.fine_tuning.jobs.create(
+        training_file=file_id,
+        model="gpt-3.5-turbo"
+    )
+    print(job)
+    return job
 
-
-def check_dataset_format():
-    """Runs checks to ensure formatting for chat completions api is correct."""
-
-
-tweets = tweet_make_content_array(CSV_FILEPATH, 50)
-get_keywords_from_tweet(tweets)
+# tweets = tweet_make_content_array(CSV_FILEPATH, 50)
+# get_keywords_from_tweet(tweets)
+file_id = upload_training_file().id
+create_fine_tuning_job(file_id)
