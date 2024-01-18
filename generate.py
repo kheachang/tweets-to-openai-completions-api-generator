@@ -94,7 +94,7 @@ def get_keywords_from_tweet(tweets):
             {"role": "user", "content": tweets_list_to_string},
         ],
     )
-    keywords_list = ast.literal_eval(response.choices[0].message.content)  # ['key1', 'key2, key3']
+    keywords_list = ast.literal_eval(response.choices[0].message.content)
     fine_tuning_jsonl_file = "tweets/fine_tuning_file.jsonl"
 
     with open("tweets/tweets_50_rows.jsonl", 'r', encoding='utf-8') as input_file:
@@ -104,10 +104,8 @@ def get_keywords_from_tweet(tweets):
                 json_data = json.loads(line.strip())
                 user_message = {"role": "user", "content": keywords_list[index]}  # add keywords to each tweet
                 if 'messages' in json_data:
-                    # Insert the new element at index 1 in the 'messages' array
                     json_data['messages'].insert(1, user_message)
 
-                    # Write the updated JSON data back to the file
                     with open(fine_tuning_jsonl_file, 'a', encoding='utf-8') as output_file:
                         output_file.write(json.dumps(json_data) + '\n')
                 return "Fine tuning file complete. Check inside the tweets directory."
@@ -145,6 +143,6 @@ def generate_tweet():  # TODO: at least a certain number of char.
     )
     print(prompt + ": " + response.choices[0].message.content) 
 
-# tweets = tweet_make_content_array(CSV_FILEPATH, 50)
-# get_keywords_from_tweet(tweets)
+tweets = tweet_make_content_array(CSV_FILEPATH, 50)
+get_keywords_from_tweet(tweets)
 generate_tweet()
