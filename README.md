@@ -18,7 +18,7 @@ This script uses the tweet as `completion` and uses OpenAI chat completion to ex
 ## Prerequisites
 This script requires you to have a csv file of your tweets. OpenAI recommends fine-tuning on 50 to 100 training examples with `gpt-3.5-turbo`. 
 
-## Getting Started
+## How to Run
 ##### 1. Install OpenAI API and get an API key. 
 ##### 2. Put your csv file of tweets into the `tweets` folder.
 ##### 3. Run `generate.py`.
